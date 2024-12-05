@@ -1,13 +1,13 @@
 # thermal-urban-feature-segmenter
 
-[![Build Status](https://jenkins.services.ai4os.eu/buildStatus/icon?job=AI4OS-hub/thermal-urban-feature-segmenter/main)](https://jenkins.services.ai4os.eu/buildStatus/icon?job=AI4OS-hub/thermal-urban-feature-segmenter/main)
+[![Build Status](https://jenkins.services.ai4os.eu/buildStatus/icon?job=AI4OS-hub/thermal-urban-feature-segmenter/main)](https://jenkins.services.ai4os.eu/job/AI4OS-hub/job/thermal-urban-feature-segmenter/job/main/)
 
 Deepaas API for thermal urban feature segmentation (TUFSeg). This code makes use of the [TUFSeg model repo](https://github.com/emvollmer/TUFSeg).
 
 To facilitate setting up, the bash script `setting_up_deployment.sh` can be 
 run to install everything automatically:
 ```bash
-wget https://raw.githubusercontent.com/ai4os-hub/thermal-urban-feature-segmenter/master/setting_up_deployment.sh
+wget https://raw.githubusercontent.com/ai4os-hub/thermal-urban-feature-segmenter/main/setting_up_deployment.sh
 source setting_up_deployment.sh
 ```
 This takes care of all required installations and finishes by running [deepaas](https://github.com/ai4os/DEEPaaS).

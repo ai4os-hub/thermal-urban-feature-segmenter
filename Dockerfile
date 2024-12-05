@@ -72,13 +72,13 @@ RUN git clone --depth 1 -b $branch --recurse-submodules https://github.com/ai4os
     cd thermal-urban-feature-segmenter && \
     git pull --recurse-submodules && \
     git submodule update --remote --recursive && \
-    pip3 install packaging==22.0 && \
     pip3 install -U pip && \
+    pip3 install packaging==22.0 && \
     pip3 install --no-cache-dir -e ./TUFSeg && \
     pip3 install --no-cache-dir -e . && \
     cd ..
 
-# download example model for inference (pretrained UNet)
+# Download the example model for inference (pretrained UNet)
 RUN mkdir -p /srv/thermal-urban-feature-segmenter/models/2023-11-20_20-35-52 && \
     wget -O /srv/thermal-urban-feature-segmenter/models/2023-11-20_20-35-52/UNet.hdf5 \
     'https://share.services.ai4os.eu/index.php/s/iz68b3stYQraXEm/download' && \
@@ -91,6 +91,11 @@ RUN mkdir -p /srv/thermal-urban-feature-segmenter/models/2023-11-20_20-35-52 && 
     'https://share.services.ai4os.eu/index.php/s/gzRD4QG3Jm8XYKt/download' && \
     wget -O /srv/thermal-urban-feature-segmenter/models/2023-11-20_20-35-52/perun_results/train_UNet_2023-11-20T20:35:50.365082.txt \
     'https://share.services.ai4os.eu/index.php/s/XyFXQ2yaWbWLsoZ/download'
+
+# Download the imagenet weights for training
+RUN mkdir -p /root/.keras/models && \
+    curl -L https://github.com/qubvel/classification_models/releases/download/0.0.1/resnet152_imagenet_1000_no_top.h5 \
+    -o /root/.keras/models/resnet152_imagenet_1000_no_top.h5
 
 # Open ports: DEEPaaS (5000), Monitoring (6006), Jupyter (8888)
 EXPOSE 5000 6006 8888
