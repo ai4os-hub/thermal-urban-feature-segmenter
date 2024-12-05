@@ -1,0 +1,4 @@
+[submodule "TUFSeg"]
+	path = TUFSeg
+	url = https://github.com/emvollmer/TUFSeg.git
+	branch = main

@@ -1,0 +1,3 @@
+KA_02/DJI_0_0437_R.npy
+MU_45/DJI_1_0230_R.npy
+MU_45/DJI_1_0632_R.npy

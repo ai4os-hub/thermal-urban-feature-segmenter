@@ -1,0 +1,73 @@
+{
+    "sm metrics": {
+        "loss": 0.11901045590639114,
+        "iou_score": 0.0794370099902153,
+        "f1-score": 0.10852640867233276,
+        "precision": 0.11136280000209808,
+        "recall": 0.22006885707378387
+    },
+    "sklearn metrics - holistic results": {
+        "mean_precision": 0.07863407159001572,
+        "mean_weighted_precision": 0.6183317214823718,
+        "mean_accuracy": 0.7863407159001572,
+        "mean_balanced_accuracy": 0.1,
+        "mean_f1": 0.6922886725680296,
+        "mean_iou": 0.07863407159001572,
+        "mean_weighted_iou": 0.6183317214823718
+    },
+    "sklearn metrics - combined imagewise results": {
+        "mean_precision": 0.1757263079400761,
+        "mean_weighted_precision": 0.65113077152825,
+        "mean_accuracy": 0.7863407159001571,
+        "mean_balanced_accuracy": 0.226544873714685,
+        "mean_f1": 0.705402815502869,
+        "mean_iou": 0.1757263079400761,
+        "mean_weighted_iou": 0.65113077152825
+    },
+    "sklearn metrics - combined imagewise classwise results": {
+        "mean_precision_classwise": {
+            "background": 0.7863407159001571,
+            "building": 0.0,
+            "car (cold)": 0.0,
+            "car (warm)": 0.0,
+            "manhole (round)": 0.0,
+            "manhole (square)": 0.0,
+            "miscellaneous": 0.0,
+            "person": 0.0,
+            "street lamp": 0.0
+        },
+        "mean_accuracy_classwise": {
+            "background": 0.7863407159001571,
+            "building": 0.7812768554687499,
+            "car (cold)": 0.9722337805706525,
+            "car (warm)": 0.981026302475527,
+            "manhole (round)": 0.9991297835010593,
+            "manhole (square)": 0.9988293132950774,
+            "miscellaneous": 0.9986383611505683,
+            "person": 0.9987501356336804,
+            "street lamp": 0.9992862955729166
+        },
+        "mean_f1_classwise": {
+            "background": 0.8672786162974455,
+            "building": 0.0,
+            "car (cold)": 0.0,
+            "car (warm)": 0.0,
+            "manhole (round)": 0.0,
+            "manhole (square)": 0.0,
+            "miscellaneous": 0.0,
+            "person": 0.0,
+            "street lamp": 0.0
+        },
+        "mean_iou_classwise": {
+            "background": 0.7863407159001571,
+            "building": 0.0,
+            "car (cold)": 0.0,
+            "car (warm)": 0.0,
+            "manhole (round)": 0.0,
+            "manhole (square)": 0.0,
+            "miscellaneous": 0.0,
+            "person": 0.0,
+            "street lamp": 0.0
+        }
+    }
+}

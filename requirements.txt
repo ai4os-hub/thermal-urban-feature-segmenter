@@ -1,0 +1,14 @@
+# DEEPaaS framework requirements
+deepaas~=2.3.2
+webargs~=5.5.2
+flaat~=1.1.1
+
+# External requirements for the model and API
+fPDF2~=2.7.5
+
+# Mlflow requirements
+protobuf==3.19
+mlflow[extras]
+requests
+mlflow-export-import
+optuna # hyperparameter optimization

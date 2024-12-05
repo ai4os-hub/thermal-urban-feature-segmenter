@@ -1,0 +1,77 @@
+metadata_version: 2.0.0
+title: Thermal Urban Feature Segmentation (TUFSeg)
+summary: Identify thermal urban features in urban landscapes via semantic segmentation
+description: |-
+  The application adapts semantic segmentation models, specifically UNet, from the 
+  [segmentation_models toolbox](https://github.com/qubvel/segmentation_models) to work
+  with combined RGB and thermal imagery to identify and classify thermal urban features 
+  (cars, manholes, streetlamps, buildings, etc) in the urban landscape.
+
+  <video controls>
+    <source src='https://github.com/user-attachments/assets/98e3f145-a861-4bda-80e8-eb9f072cdeab' type='video/mp4'>
+    Your browser does not support the video tag.
+  </video>
+
+  **Training the deep learning model(s)**
+  
+  The service is based on the [TUFSeg code](https://github.com/emvollmer/TUFSeg) for
+  thermal urban feature segmentation.
+  The UNet model can be trained from scratch or using pretrained ImageNet weights. The 
+  utilised data can be preprocessed for training in various ways, including vignetting
+  correction for halo effect removal or retinex unsharp filters for contrast increase and
+  deblurring.
+
+  Training via this application automatically creates a timestamp folder within
+  the `thermal-urban-feature-segmenter/models/` folder.
+  
+  **Data**
+  
+  The dataset that forms the basis of model training is [Thermal Urban Feature 
+  Segmentation (TUFSeg)](https://doi.org/10.5281/zenodo.10814413) (note: this is not 
+  yet publicly available). It stems from a case study of the cities of Munich and
+  Karlsruhe in Germany and encompasses drone-based multi-spectral (thermal and standard
+  RGB) imagery.
+  The dataset contains **793 images** with a total of **8010 annotations** of 
+  common thermal urban features, including buildings, cars, manholes, people, 
+  streetlamps, and miscellaneous:
+  * train (634 images)
+  * test (159 images)
+
+  Due to the small number of images, no validation set is created and instead the data
+  is merely split into train / test.
+  
+  **Inference**
+  
+  The docker image contains a pretrained UNet model for inference 
+  (thermal-urban-feature-segmenter/models) that expects aligned, 4-channel numpy inputs `
+  (RGB, T)` formatted in the same way as the training data.
+  The inference results are automatically saved to the utilised model's timestamp folder. 
+  
+  **References**
+  1. Vollmer, E., Klug, L., Volk, R. and Schultmann, F. AI in multispectral image
+  analysis: Implementing a deep learning model for the segmentation of common thermal
+  urban features to assist in the automation of infrastructure-related maintenance.
+  4th Artificial Intelligence in Architecture, Engineering and Construction Conference
+  (2024), Helsinki, Finland.
+  [https://publikationen.bibliothek.kit.edu/1000169834](https://publikationen.bibliothek.kit.edu/1000169834)
+dates:
+  created: '2024-11-29'
+links:
+  source_code: https://github.com/ai4os-hub/thermal-urban-feature-segmenter
+  docker_image: tensorflow/tensorflow:2.10.0-gpu
+  ai4_template: ai4-template/1.9.9
+tags:
+  - deep learning
+  - semantic segmentation
+  - multi-spectral data
+tasks:
+  - Computer Vision
+categories:
+  - AI4 trainable
+  - AI4 pre trained
+  - AI4 inference
+libraries:
+  - TensorFlow
+  - Keras
+data-type:
+  - Image

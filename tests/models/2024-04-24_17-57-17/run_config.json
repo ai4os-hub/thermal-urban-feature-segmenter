@@ -1,0 +1,151 @@
+{
+    "data_root": "/path/to/data/root",
+    "anno_root": "/path/to/annotations/jsons",
+    "split_root": "/path/to/split/",
+    "img_folder": "images",
+    "mask_folder": "masks",
+    "model_root": "/path/to/model/root",
+    "model_folder": "2024-04-24_17-57-17",
+    "split": [
+        "train",
+        "test"
+    ],
+    "data": {
+        "ANNO_IMG_SHAPE": [
+            512,
+            640
+        ],
+        "loader": {
+            "SIZE_H": 256,
+            "SIZE_W": 320,
+            "channels": 4,
+            "processing": "basic",
+            "only_tir": false
+        },
+        "annotations": {
+            "descriptor": "thermal_objects",
+            "classes": [
+                "building",
+                "car (cold)",
+                "car (warm)",
+                "manhole (round) cold",
+                "manhole (round) warm",
+                "manhole (square) cold",
+                "manhole (square) warm",
+                "miscellaneous",
+                "person",
+                "street lamp cold",
+                "street lamp warm"
+            ]
+        },
+        "masks": {
+            "labels": [
+                "building",
+                "car (cold)",
+                "car (warm)",
+                "manhole (round)",
+                "manhole (square)",
+                "miscellaneous",
+                "person",
+                "street lamp"
+            ],
+            "custom_colors": [
+                [
+                    0.16,
+                    0.16,
+                    0.16
+                ],
+                "brown",
+                "blue",
+                "yellowgreen",
+                "yellow",
+                "magenta",
+                "red",
+                "orange",
+                "lightgray",
+                "aqua",
+                "white",
+                "coral",
+                "teal",
+                "pink",
+                "goldenrod",
+                "green",
+                "plum",
+                "purple",
+                "silver",
+                "indigo"
+            ]
+        }
+    },
+    "model": {
+        "type": "UNet",
+        "backbone": "mobilenetv2",
+        "encoded_weights": null,
+        "suffix": ".hdf5"
+    },
+    "train": {
+        "epochs": 1,
+        "batch_size": 1,
+        "seed": 1,
+        "optimizer": {
+            "name": "Adam",
+            "lr": 0.001
+        },
+        "loss": {
+            "name": "SigmoidFocalCrossEntropy",
+            "function": "tfa.losses.SigmoidFocalCrossEntropy",
+            "alpha": 0.3,
+            "gamma": 3
+        }
+    },
+    "eval": {
+        "SKLEARN_METRICS": {
+            "precision": {
+                "func": "precision_score",
+                "params": {
+                    "average": "macro",
+                    "zero_division": 0.0
+                }
+            },
+            "weighted_precision": {
+                "func": "precision_score",
+                "params": {
+                    "average": "weighted",
+                    "zero_division": 0.0
+                }
+            },
+            "accuracy": {
+                "func": "accuracy_score",
+                "params": {}
+            },
+            "balanced_accuracy": {
+                "func": "balanced_accuracy_score",
+                "params": {}
+            },
+            "f1": {
+                "func": "f1_score",
+                "params": {
+                    "average": "weighted"
+                }
+            },
+            "iou": {
+                "func": "jaccard_score",
+                "params": {
+                    "average": "macro"
+                }
+            },
+            "weighted_iou": {
+                "func": "jaccard_score",
+                "params": {
+                    "average": "weighted"
+                }
+            }
+        },
+        "SM_METRICS": {
+            "iou_score": "sm.metrics.iou_score",
+            "f1_score": "sm.metrics.f1_score",
+            "precision": "sm.metrics.precision",
+            "recall": "sm.metrics.recall"
+        }
+    }
+}
