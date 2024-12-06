@@ -20,7 +20,7 @@ LABEL version='0.0.1'
 # Deepaas API for TBBRDet Model
 
 # What user branch to clone [!]
-ARG branch=master
+ARG branch=main
 
 # Install Ubuntu packages / applications
 RUN apt-get update && \
