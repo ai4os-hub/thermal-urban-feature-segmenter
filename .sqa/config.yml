@@ -1,0 +1,29 @@
+# .sqa/config.yml - jenkins-pipeline-library configuration file
+environment:
+  JPL_DOCKERFORCEBUILD: "True"
+  LANG: C.UTF-8
+
+sqa_criteria:
+  qc_style:
+    repos:
+      thermal-urban-feature-segmenter:
+        container: thisrepo-testing
+        commands:
+        - sh -c 'git submodule update --init --remote --recursive'
+        - tox -e qc.sty
+  qc_coverage:
+    repos:
+      thermal-urban-feature-segmenter:
+        container: thisrepo-testing
+        commands:
+        - sh -c 'git submodule update --init --remote --recursive'
+        - tox -e qc.cov
+  qc_security:
+    repos:
+      thermal-urban-feature-segmenter:
+        container: thisrepo-testing
+        commands:
+        - sh -c 'git submodule update --init --remote --recursive'
+        - tox -e qc.sec
+
+timeout: 600
