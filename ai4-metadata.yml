@@ -59,7 +59,7 @@ dates:
   updated: '2024-12-06'
 links:
   source_code: https://github.com/ai4os-hub/thermal-urban-feature-segmenter
-  docker_image: tensorflow/tensorflow:2.10.0-gpu
+  docker_image: ai4oshub/thermal-urban-feature-segmenter
   ai4_template: ai4-template/1.9.9
 tags:
   - deep learning
