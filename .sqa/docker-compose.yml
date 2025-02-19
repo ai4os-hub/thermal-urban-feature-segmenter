@@ -7,8 +7,8 @@ services:
     hostname: "${BUILD_TAG}"
     working_dir: /srv/app
     command: >
-      sh -c "git config --global --add safe.directory /srv &&
-             git config --global --add safe.directory /srv/TUFSeg &&
+      sh -c "git config --global --add safe.directory /srv/app &&
+             git config --global --add safe.directory /srv/app/TUFSeg &&
              tail -f /dev/null"
     volumes:
       - type: bind
