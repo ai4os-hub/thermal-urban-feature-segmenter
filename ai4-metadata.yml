@@ -56,6 +56,7 @@ description: |-
   [https://publikationen.bibliothek.kit.edu/1000169834](https://publikationen.bibliothek.kit.edu/1000169834)
 dates:
   created: '2024-11-29'
+  updated: '2024-12-06'
 links:
   source_code: https://github.com/ai4os-hub/thermal-urban-feature-segmenter
   docker_image: tensorflow/tensorflow:2.10.0-gpu
