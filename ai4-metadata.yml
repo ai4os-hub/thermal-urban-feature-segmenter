@@ -27,10 +27,9 @@ description: |-
   **Data**
   
   The dataset that forms the basis of model training is [Thermal Urban Feature 
-  Segmentation (TUFSeg)](https://doi.org/10.5281/zenodo.10814413) (note: this is not 
-  yet publicly available). It stems from a case study of the cities of Munich and
-  Karlsruhe in Germany and encompasses drone-based multi-spectral (thermal and standard
-  RGB) imagery.
+  Segmentation (TUFSeg)](https://doi.org/10.5281/zenodo.10814413).
+  It stems from a case study of the cities of Munich and Karlsruhe in Germany and
+  encompasses drone-based multi-spectral (thermal and standard RGB) imagery.
   The dataset contains **793 images** with a total of **8010 annotations** of 
   common thermal urban features, including buildings, cars, manholes, people, 
   streetlamps, and miscellaneous:
@@ -48,12 +47,18 @@ description: |-
   The inference results are automatically saved to the utilised model's timestamp folder. 
   
   **References**
-  1. Vollmer, E., Klug, L., Volk, R. and Schultmann, F. AI in multispectral image
+  1. Vollmer, E. et al. "Enhancing UAS-Based Multispectral Semantic Segmentation Through 
+  Feature Engineering," in IEEE Journal of Selected Topics in Applied Earth Observations 
+  and Remote Sensing, vol. 18, pp. 6206-6216, 2025, doi: 
+  [10.1109/JSTARS.2025.3537330](https://doi.org/10.1109/JSTARS.2025.3537330)
+  
+  2. Vollmer, E., Klug, L., Volk, R. and Schultmann, F. "AI in multispectral image
   analysis: Implementing a deep learning model for the segmentation of common thermal
-  urban features to assist in the automation of infrastructure-related maintenance.
+  urban features to assist in the automation of infrastructure-related maintenance," in
   4th Artificial Intelligence in Architecture, Engineering and Construction Conference
   (2024), Helsinki, Finland.
   [https://publikationen.bibliothek.kit.edu/1000169834](https://publikationen.bibliothek.kit.edu/1000169834)
+
 dates:
   created: '2024-11-29'
   updated: '2024-12-06'
