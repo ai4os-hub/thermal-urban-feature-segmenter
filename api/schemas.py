@@ -9,24 +9,6 @@ from webargs import ValidationError, fields, validate
 from . import config, responses, utils
 
 
-class NpyFile(fields.String):
-    """Field that takes a file path as a string and makes sure it exists
-    either locally in repository directory or remotely on Nextcloud,
-    whilst also ensuring it's a numpy file.
-    """
-    def _deserialize(self, value, attr, data, **kwargs):
-        if Path(value).is_file():
-            if value.endswith(".npy"):
-                return value
-            raise ValidationError(
-                f"Provided file path `{value}` is not a numpy file."
-            )
-        else:
-            raise ValidationError(
-                f"Provided file path `{value}` does not exist."
-            )
-
-
 class Directory(fields.String):
     """Field that takes a directory as a string and makes sure it exists.
     """
@@ -50,6 +32,15 @@ class PredArgsSchema(marshmallow.Schema):
     class Meta:  # Keep order of the parameters as they are defined.
         ordered = True
 
+    input_file = fields.Field(
+        required=True,
+        metadata={
+            'type': "file",
+            'location': "form",
+            'description': 'Input a 4-channel .npy file to infer upon.'
+        }
+    )
+    
     # Helper variables to avoid long f-strings
     local_dirs = utils.get_local_dirs(
         config.MODELS_PATH,
@@ -62,7 +53,7 @@ class PredArgsSchema(marshmallow.Schema):
     model_dir = Directory(
         metadata={
             'description': (
-                'Model to be used for prediction. Results will be saved '
+                'Choose a model to use for inference. Results will be saved '
                 'to a "predictions" folder in the selected model directory.'
                 '\n\nCurrently existing model paths are:'
                 f'\n- local:\n{local_dirs}'
@@ -75,18 +66,6 @@ class PredArgsSchema(marshmallow.Schema):
         ),
     )
 
-    input_file = NpyFile(
-        metadata={
-            "description": "Insert a .npy path of a four channels file to "
-                           "infer on. Provide this in either one of two ways:"
-                           "\n- local path (in 'data/')"
-                           "\tf.e.: 'images/KA_01/DJI_0_0001_R.npy'"
-                           "\n- remote path on Nextcloud"
-                           "\tf.e.: '/storage/.../KA_01/DJI_0_0001_R.npy'",
-        },
-        required=True,
-    )
-
     display = fields.Boolean(
         metadata={
             "description": "Plot the resulting prediction to the console."
@@ -96,11 +75,12 @@ class PredArgsSchema(marshmallow.Schema):
 
     accept = fields.String(
         metadata={
-            "description": "Return format for method response.",
+            "description": "Return format for method response. "
+                           "'image/png' will return a downloadable file.",
             "location": "headers",
         },
         validate=validate.OneOf(list(responses.content_types)),
-        load_default='application/json',
+        load_default='image/png',
     )
 
 

@@ -30,21 +30,14 @@ def predict(**kwargs):
     --- WITHOUT COPYING DATA OR MODELS
     (WORKING IN NEXTCLOUD IF THAT'S WHERE THE DATA/MODEL IS)
     """
+    logger.debug(f"Running 'predict'")
     model_path = Path(kwargs['model_dir'])
-    logger.debug(f"Predicting with model: {model_path}")
-
-    # if input_file is a remote file ('/storage/'), work remotely
-    if cfg.REMOTE_PATH in kwargs['input_file']:
-        input_file_path = Path(kwargs['input_file'])
-    else:
-        input_file_path = Path(cfg.DATA_PATH, kwargs['input_file'])
-
-    logger.debug(f"Predicting on image: {input_file_path}")
+    input_filepath = Path(kwargs['input_filepath'])
 
     # prediction
     predict_func(
         model_dir=model_path,
-        img_path=input_file_path,
+        img_path=input_filepath,
         mask_path=None,
         display=kwargs['display'],
         save=True,
@@ -55,7 +48,7 @@ def predict(**kwargs):
     if Path(model_path, 'predictions').is_dir():
         pred_results = [
             f for f in Path(model_path, 'predictions').rglob("*.png")
-            if Path(input_file_path).stem == f.stem
+            if Path(input_filepath).stem == f.stem
         ]
 
         if pred_results:
@@ -70,7 +63,7 @@ def predict(**kwargs):
         else:
             predict_result = {
                 'result': f'Error occurred. No matching prediction '
-                          f'results for file "{kwargs["input_file"]}" '
+                          f'results for file "{input_filepath.name}" '
                           f'in "{model_path}".'
             }
     else:
@@ -79,7 +72,6 @@ def predict(**kwargs):
                       f'created at "{model_path}".'
         }
     logger.debug(f"[predict()]: {predict_result}")
-
     return predict_result
 
 

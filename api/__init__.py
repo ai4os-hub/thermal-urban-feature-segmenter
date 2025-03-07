@@ -9,6 +9,8 @@ docs [1] and at a canonical exemplar module [2].
 import getpass
 import logging
 import os
+from pathlib import Path
+import shutil
 
 from aiohttp.web import HTTPException
 
@@ -74,9 +76,24 @@ def predict(accept='application/json', **options):
         The predicted model values (dict or str) or files.
     """
     try:
+        # handle input file (path from a browsing webargs field)
+        tmp_filepath = Path(options['input_file'].filename)
+        input_filepath = Path(config.DATA_PATH,
+                              options['input_file'].original_filename)
+        if input_filepath.suffix != ".npy":
+            raise ValueError(
+                f"Selected input '{input_filepath.name}' is not a .npy!"
+            )
+        shutil.copy(tmp_filepath, input_filepath)
+        options = {**{"input_filepath": input_filepath}, **options}
+
         for k, v in options.items():
             logger.info(f"POST 'predict' argument - {k}:\t{v}")
         result = aimodel.predict(**options)
+
+        # delete copied image
+        input_filepath.unlink()
+
         logger.info("POST 'predict' result: %s", result)
         logger.debug("POST 'predict' returning content_type for: %s",
                      accept)
@@ -84,7 +101,7 @@ def predict(accept='application/json', **options):
     except Exception as err:
         logger.error("Error while running POST 'predict': %s",
                      err, exc_info=True)
-        raise HTTPException(reason=err) from err
+        raise  # Reraise the exception after log
 
 
 @utils.train_arguments(schema=schemas.TrainArgsSchema)
@@ -124,39 +141,3 @@ def train(**options):
         logger.error("Error while running 'POST' train: %s",
                      err, exc_info=True)
         raise  # Reraise the exception after log
-
-
-if __name__ == "__main__":
-    metadata = get_metadata()
-
-    # train_args = {
-    #     'mlflow_username': None
-    #     'backbone': 'resnet152',
-    #     'encoded_weights': 'imagenet',
-    #     'dataset_path': None,
-    #     'save_for_viewing': False,
-    #     'test_size': 0.2,
-    #     'channels': 4,
-    #     'processing': "basic",
-    #     'img_size': "320x256",
-    #     'epochs': 1,
-    #     'batch_size': 4,
-    #     'lr': 0.001,
-    #     'seed': 42
-    # }
-    # train(
-    #     **train_args
-    # )
-
-    # pred_args = {
-    #     'model_dir': '/storage/tufsegm/models/2023-09-21_11-42-18',
-    #     'input_file': '/storage/tugsegm/remote_data/images/'
-    #                   'MU_09/DJI_0_0001_R.npy',
-    #     'display': False,
-    #     'save': True,
-    #     'accept': 'application/json'
-    # }
-    # predict(
-    #     accept='application/json',
-    #     **pred_args
-    # )
