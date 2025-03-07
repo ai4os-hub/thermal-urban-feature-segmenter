@@ -29,3 +29,6 @@ if command -v nvidia-smi &> /dev/null; then
 else
     echo "No GPU detected. Running without GPU."
 fi
+
+echo "Starting deepaas..."
+exec deepaas-run --listen-ip 0.0.0.0 --listen-port 5000
