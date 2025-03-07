@@ -101,6 +101,6 @@ RUN mkdir -p /root/.keras/models && \
 EXPOSE 5000 6006 8888
 
 # Set entrypoint to handle CUDA version check
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["/srv/thermal-urban-feature-segmenter/docker-entrypoint.sh"]
 # Launch deepaas
 CMD ["deepaas-run", "--listen-ip", "0.0.0.0", "--listen-port", "5000"]
