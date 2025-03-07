@@ -39,6 +39,8 @@ number of tests generated can grow exponentially.
 """
 # pylint: disable=redefined-outer-name
 import pytest
+from pathlib import Path
+from deepaas.model.v2.wrapper import UploadedFile
 
 import api
 
@@ -51,8 +53,13 @@ def model_dir(request):
 
 @pytest.fixture(scope="module", params=["images/KA_02/DJI_0_0001_R.npy"])
 def input_file(request):
-    """Fixture to provide the input_file argument to api.predict."""
-    return request.param
+    """Fixture to provide the input_file argument to api.predict
+    as an 'UploadedFile'."""
+    # Load the actual file content into the mock
+    file = Path("/srv/thermal-urban-feature-segmenter/tests/data",
+                request.param)
+    return UploadedFile("input_file", file, "application/octet-stream",
+                        request.param.split("/")[-1])
 
 
 @pytest.fixture(scope="module", params=[False])

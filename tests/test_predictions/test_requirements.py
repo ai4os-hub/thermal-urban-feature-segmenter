@@ -27,12 +27,19 @@ def test_predictions_type(predictions):
 
 def test_predictions_outputs(predictions, model_dir, input_file):
     """Tests that predictions outputs saved files."""
+    # assert type(predictions) is str, \
+    #     f"Predictions are: {predictions}"
+
     prediction_path = Path(model_dir, "predictions")
     assert Path(prediction_path).is_dir(), \
         "Path to predictions does not exist."
-    image_path = Path(Path(input_file).parent.name, Path(input_file).name)
-    assert Path(prediction_path, image_path).is_file(), \
-        "Prediction .npy file for input_file does not exist."
+
+    image_filename = Path(input_file.filename).name
+    out_path = Path(prediction_path, image_filename)
+    print(f"Expected file path: {out_path}")
+    assert out_path.is_file(), \
+        f"Prediction .npy file for input_file {image_filename} " \
+        f"does not exist at {out_path}."
 
 
 # Example to test predictions probabilities output shapes

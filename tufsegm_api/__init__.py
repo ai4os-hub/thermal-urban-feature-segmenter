@@ -30,7 +30,7 @@ def predict(**kwargs):
     --- WITHOUT COPYING DATA OR MODELS
     (WORKING IN NEXTCLOUD IF THAT'S WHERE THE DATA/MODEL IS)
     """
-    logger.debug(f"Running 'predict'")
+    logger.debug("Running 'predict'")
     model_path = Path(kwargs['model_dir'])
     input_filepath = Path(kwargs['input_filepath'])
 

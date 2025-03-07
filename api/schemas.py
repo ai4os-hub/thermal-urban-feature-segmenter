@@ -40,7 +40,7 @@ class PredArgsSchema(marshmallow.Schema):
             'description': 'Input a 4-channel .npy file to infer upon.'
         }
     )
-    
+
     # Helper variables to avoid long f-strings
     local_dirs = utils.get_local_dirs(
         config.MODELS_PATH,
@@ -98,14 +98,6 @@ class TrainArgsSchema(marshmallow.Schema):
         },
         load_default=None,
     )
-
-    # model_type = fields.String(
-    #     metadata={
-    #         "description": "Segmentation model type.",
-    #     },
-    #     validate=validate.OneOf(['UNet']),
-    #     load_default="UNet",
-    # )
 
     backbone = fields.String(
         metadata={
