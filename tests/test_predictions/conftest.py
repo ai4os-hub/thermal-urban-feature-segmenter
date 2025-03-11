@@ -56,8 +56,8 @@ def input_file(request):
     """Fixture to provide the input_file argument to api.predict
     as an 'UploadedFile'."""
     # Load the actual file content into the mock
-    file = Path("/srv/thermal-urban-feature-segmenter/tests/data",
-                request.param)
+    # file = "/srv/thermal-urban-feature-segmenter/tests/data/"
+    file = Path(api.config.DATA_PATH, request.param)
     return UploadedFile("input_file", file, "application/octet-stream",
                         request.param.split("/")[-1])
 

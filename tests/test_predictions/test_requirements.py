@@ -42,8 +42,8 @@ def test_predictions_outputs(predictions, model_dir, input_file):
 
     # check a .npy file with the original image name
     # also exists in the directory
-    image_name = Path("data", input_file.filename)
-    out_path = Path(prediction_dir, image_name)
+    out_path = Path(prediction_dir, "data",
+                    input_file.original_filename)
     assert out_path.is_file(), \
-        f"Prediction .npy file for input_file '{image_name}' " \
-        f"does not exist at '{out_path}'."
+        f"Prediction .npy file for input_file " \
+        f"'{input_file.original_filename}' does not exist at '{out_path}'."
