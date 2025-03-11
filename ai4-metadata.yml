@@ -1,6 +1,6 @@
 metadata_version: 2.0.0
 title: Thermal Urban Feature Segmentation (TUFSeg)
-summary: Identify thermal urban features in urban landscapes via semantic segmentation
+summary: Identify common thermal urban features in urban landscapes via semantic segmentation
 description: |-
   The application adapts semantic segmentation models, specifically UNet, from the 
   [segmentation_models toolbox](https://github.com/qubvel/segmentation_models) to work
@@ -66,6 +66,7 @@ links:
   source_code: https://github.com/ai4os-hub/thermal-urban-feature-segmenter
   docker_image: ai4oshub/thermal-urban-feature-segmenter
   ai4_template: ai4-template/1.9.9
+  dataset: https://zenodo.org/records/10814413
 tags:
   - deep learning
   - semantic segmentation
