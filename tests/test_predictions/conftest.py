@@ -72,17 +72,3 @@ def display(request):
 def accept(request):
     """Fixture to provide the accept argument to api.predict."""
     return request.param
-
-
-# Example of fixture for a batch_size parametrization
-# @pytest.fixture(scope="module", params=[None, 20])
-# def batch_size(request):
-#     """Fixture to provide the batch_size option to api.predict."""
-#     return request.param
-
-
-# Example of fixture for a steps parametrization
-# @pytest.fixture(scope="module", params=[None, 2])
-# def steps(request):
-#     """Fixture to provide the steps option to api.predict."""
-#     return request.param

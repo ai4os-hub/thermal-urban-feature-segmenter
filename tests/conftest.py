@@ -40,7 +40,8 @@ def config_file(request):
 
 @pytest.fixture(scope="module", name="tmptestsdir")
 def create_tmptestsdir():
-    """Fixture to generate a temporary directory for each test module."""
+    """Fixture to generate a temporary directory for each test module.
+    NOTE: It and all its contents are deleted automatically post-testing."""
     with tempfile.TemporaryDirectory() as tmptestsdir:
         os.chdir(tmptestsdir)
         yield tmptestsdir

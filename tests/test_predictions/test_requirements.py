@@ -26,39 +26,24 @@ def test_predictions_type(predictions):
 
 
 def test_predictions_outputs(predictions, model_dir, input_file):
-    """Tests that predictions outputs saved files."""
-    # assert type(predictions) is str, \
-    #     f"Predictions are: {predictions}"
+    """Tests that inference returns saved files."""
 
-    prediction_path = Path(model_dir, "predictions")
-    assert Path(prediction_path).is_dir(), \
-        "Path to predictions does not exist."
+    # check a predictions subfolder was generated
+    prediction_dir = Path(model_dir, "predictions")
+    assert Path(prediction_dir).is_dir(), \
+        f"Path to prediction folder {prediction_dir} " \
+        "does not exist."
 
-    image_filename = Path(input_file.filename).name
-    out_path = Path(prediction_path, image_filename)
-    print(f"Expected file path: {out_path}")
+    # check the official "result" is a file, not an error
+    result = predictions["result"]
+    assert Path(result).is_file(), \
+        f"Prediction output '{result}' " \
+        "is not an existing file!"
+
+    # check a .npy file with the original image name
+    # also exists in the directory
+    image_name = Path("data", input_file.filename)
+    out_path = Path(prediction_dir, image_name)
     assert out_path.is_file(), \
-        f"Prediction .npy file for input_file {image_filename} " \
-        f"does not exist at {out_path}."
-
-
-# Example to test predictions probabilities output shapes
-# def test_predictions_len(predictions):
-#     """Tests that predictions have length of 10."""
-#     for prediction in predictions[0:10]:
-#         assert isinstance(prediction, list)
-#         assert len(prediction) == 10
-
-
-# Example to test predictions probabilities range 0.0 and 1.1
-# def test_predictions_range(predictions):
-#     """Tests that predictions are between 0 and 1."""
-#     for prediction in predictions[0:10]:
-#         assert all(0.0 <= x <= 1.1 for x in prediction)
-
-
-# Example to test predictions probabilities total =~ 1.0
-# def test_predictions_sum(predictions):
-#     """Tests that sum of ind predictions totals ~1.0."""
-#     for prediction in predictions[0:10]:
-#         assert 0.99 < sum(prediction) < 1.01
+        f"Prediction .npy file for input_file '{image_name}' " \
+        f"does not exist at '{out_path}'."
