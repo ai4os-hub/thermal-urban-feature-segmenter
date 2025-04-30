@@ -444,18 +444,18 @@ def main(
                     return None
 
             # Call the function and print the output
-        output = get_job_stats()
-        if output:
-            print(output)
-        else:
-            print("nothing to see here")
+       # output = get_job_stats()
+     #   if output:
+      #      print(output)
+     #   else:
+        #    print("nothing to see here")
 
         history = model.fit(
             X_train,
             y_train_onehot,
             batch_size=cfg["batch_size"],
             verbose=2,
-            epochs=cfg["epochs"],
+            epochs=1,#cfg["epochs"],
             validation_data=(X_test, y_test_onehot),
             callbacks=[CustomEpochLogger()],
         )
@@ -569,19 +569,20 @@ def load_data(site):
     :return: X_train, y_train, X_test, y_test
     """
     if site=="site-1":
-        data_path = "/hkfs/home/project/hk-project-test-p0023500/mp9809/datasets/dataset_MU/"
+        data_path = "/home/se1131/Documents/thermal-urban-feature-segmenter/data/dataset/"
     else:
-        data_path = "/hkfs/home/project/hk-project-test-p0023500/mp9809/datasets/dataset_KA/"
+        data_path = "/home/se1131/Documents/thermal-urban-feature-segmenter/data/dataset/"
     
     start = time.time()
-    image_path = data_path + 'images'
-    masks_path = data_path + 'masks'
-    img_proc = ImageProcessor(config, image_path)
-    print(config)
+    #image_path =   'images'
+    #masks_path =   'masks'
+    config['data_root'] =  data_path 
+    img_proc = ImageProcessor(config)
+   # print(config)
     X_train = img_proc.process_images(root="train")
     X_test = img_proc.process_images(root="test")
 
-    mask_proc = MaskProcessor(config, masks_path)
+    mask_proc = MaskProcessor(config)
     y_train = mask_proc.load_masks(root="train")
     y_test = mask_proc.load_masks(root="test")
 
