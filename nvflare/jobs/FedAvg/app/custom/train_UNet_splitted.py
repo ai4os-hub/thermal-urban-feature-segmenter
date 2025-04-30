@@ -428,34 +428,12 @@ def main(
 
         combined_mean_scores_global,_=evaluate(model,config,X_test,y_test)
 
-
-        def get_job_stats():
-                cmd = ['sacct', 
-                    '--format=User,Account,JobID,JobName,ConsumedEnergy,NodeList,Elapsed,State']
-    
-                try:
-                    result = subprocess.run(cmd,
-                              capture_output=True,
-                              text=True,
-                              check=True)
-                    return result.stdout
-                except subprocess.CalledProcessError as e:
-                    print(f"Error running sacct: {e}")
-                    return None
-
-            # Call the function and print the output
-       # output = get_job_stats()
-     #   if output:
-      #      print(output)
-     #   else:
-        #    print("nothing to see here")
-
-        history = model.fit(
+        model.fit(
             X_train,
             y_train_onehot,
             batch_size=cfg["batch_size"],
             verbose=2,
-            epochs=1,#cfg["epochs"],
+            epochs=cfg["epochs"],
             validation_data=(X_test, y_test_onehot),
             callbacks=[CustomEpochLogger()],
         )
@@ -482,34 +460,6 @@ def main(
         _logger.info(
             f"Saved configuration of training run to {model_dir}"
         )
-
-        current_round = input_model.current_round
-        total_rounds = input_model.total_rounds
-        print(current_round)
-        print(total_rounds)
-        
-        if current_round == (total_rounds - 2):
-            def get_job_stats():
-                cmd = ['sacct', 
-                    '--format=User,Account,JobID,JobName,ConsumedEnergy,NodeList,Elapsed,State']
-    
-                try:
-                    result = subprocess.run(cmd,
-                              capture_output=True,
-                              text=True,
-                              check=True)
-                    return result.stdout
-                except subprocess.CalledProcessError as e:
-                    print(f"Error running sacct: {e}")
-                    return None
-
-            # Call the function and print the output
-            output = get_job_stats()
-            if output:
-                print(output)
-            else:
-                print("nothing to see here")
-
         
         # (3) send back the model to nvflare server
         output_model = flare.FLModel(
@@ -569,9 +519,9 @@ def load_data(site):
     :return: X_train, y_train, X_test, y_test
     """
     if site=="site-1":
-        data_path = "/home/se1131/Documents/thermal-urban-feature-segmenter/data/dataset/"
+        data_path = "/Users/leo/Desktop/MA/datasets/dataset_KA_test"
     else:
-        data_path = "/home/se1131/Documents/thermal-urban-feature-segmenter/data/dataset/"
+        data_path = "/Users/leo/Desktop/MA/datasets/dataset_MU_test"
     
     start = time.time()
     #image_path =   'images'
