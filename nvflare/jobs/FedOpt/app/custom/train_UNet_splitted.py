@@ -45,9 +45,10 @@ import numpy as np
 import tensorflow as tf
 #tf.debugging.set_log_device_placement(True)
 import tensorflow_addons as tfa
-
 from keras.layers import Input, Conv2D
 from evaluate import evaluate
+
+
 #Some options such that TF does not allocate all the GPU resources
 config = tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -57,11 +58,17 @@ session = tf.compat.v1.Session(config=config)
 #List the available GPUs and set XLA_FLAGS environment variable for TensorFlow
 gpus = tf.config.list_physical_devices('GPU')
 if gpus:
+    #cuda_data_dir = os.path.join(os.environ['CUDA_HOME'], 'nvvm/libdevice')
+    #os.environ['XLA_FLAGS'] = f'--xla_gpu_cuda_data_dir={cuda_data_dir}'
     print("GPUs are available:")
     for gpu in gpus:
         print(" ", gpu)        
 else:
     print("No GPUs are available.")
+
+#os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"
+os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "True"
+os.environ["TF_GPU_ALLOCATOR"] = "cuda_malloc_asyncp"
 
 # (1) import nvflare client API
 import nvflare.client as flare
@@ -112,7 +119,44 @@ class GetKeyValuePairs(argparse.Action):
                     pass
             getattr(namespace, self.dest)[key] = value
 
-
+from tensorflow_addons.layers import GroupNormalization
+ 
+# Configure segmentation models to use GroupNormalization
+def get_unet_with_groupnorm( model):
+     
+    # Replace all BatchNormalization layers with GroupNormalization
+    input_tensor = model.input
+    x = input_tensor
+    
+    def replace_layer(layer):
+        if isinstance(layer, tf.keras.layers.BatchNormalization):
+            channels = layer.input_shape[-1]
+            # Choose appropriate number of groups
+            num_groups = min(32, channels)
+            # Ensure number of channels is divisible by groups
+            while channels % num_groups != 0:
+                num_groups -= 1 
+            return GroupNormalization(
+                groups=num_groups,
+                axis=-1,
+                epsilon=0.001,
+                center=True,
+                scale=True
+            )
+        return layer
+    
+    # Create new model with replaced layers
+    new_model = tf.keras.models.clone_model(
+        model,
+        clone_function=replace_layer
+    )
+    
+    # Copy weights for non-BatchNorm layers
+    for layer, new_layer in zip(model.layers, new_model.layers):
+        if not isinstance(layer, tf.keras.layers.BatchNormalization):
+            new_layer.set_weights(layer.get_weights())
+    
+    return new_model
 def parse_args():
     parser = argparse.ArgumentParser(description="Training model")
     parser.add_argument(
@@ -210,7 +254,7 @@ def parse_args():
     )
     log_levels_group.set_defaults(log_level=logging.WARNING)
     return parser.parse_args()
-    
+
 def main(
     data_root: Path = None,
     split_root: Path = None,
@@ -222,7 +266,6 @@ def main(
     log_level=logging.WARNING,
 ):
     
-
     """
     Coordinate model training with user inputs
     """
@@ -339,6 +382,7 @@ def main(
             classes=NUM_CLASSES,
             input_shape=(SIZE_H, SIZE_W, N),
         )
+        model=get_unet_with_groupnorm(model)
     else:
         _logger.info(
             f"Channel count of {N} != 3. Adapting UNet by including a fitting first layer..."
@@ -348,40 +392,41 @@ def main(
             encoder_weights="imagenet",
             classes=NUM_CLASSES,
         )
+        base_model=get_unet_with_groupnorm(base_model)
 
         inp = Input(shape=(SIZE_H, SIZE_W, N))
         layer_1 = Conv2D(3, (1, 1))(
+            
             inp
         )  # map N channels data to 3 channels
         out = base_model(layer_1)
 
-         
-
-        #out = Lambda(lambda x: base_model(x), name='base_model_output')(layer_1) 
-
-
         model = keras.models.Model(
             inputs=inp, outputs=out, name=base_model.name
         )
+        model.summary()
+        
     metrics = [eval(v) for v in config["eval"]["SM_METRICS"].values()]
+    
+    
     model.compile(
         optimizer=optimizer(learning_rate=learning_rate),
         loss=loss_function(alpha=alpha, gamma=gamma),
         metrics=metrics,
     )
-
     early_stopping= EarlyStopping( monitor="val_precision", 
     patience=3,
     verbose=1,
     restore_best_weights=True 
-    )
+     )
 
     model_path = Path(model_dir, config["model"]["type"] + ".h5py")
 
     model_info = flare.receive()
+ 
 
     total_rounds = model_info.total_rounds
-
+    print(f'the total number of rounds are {total_rounds}')
     #create a dict of the parameters that should be tracked
     model_config = copy.copy(config)
     
@@ -392,9 +437,10 @@ def main(
         **model_config['train']
     }
     rounds = {"rounds": total_rounds}
-
+    print(f'logging the model_param {total_rounds}')
 
     mlflow_writer.log_params(model_params)
+    print(f'logged  the model_param {total_rounds}')
     
     @flare.train
     def train(input_model=None):
@@ -412,7 +458,7 @@ def main(
         :return: model saved to provided path
         """
         nvconfig = flare.get_config() 
-        print(nvconfig)        
+        print(nvconfig)
         
         start = time.time()
         # Check that provided path can be used for saving model
@@ -425,10 +471,9 @@ def main(
         for k, v in input_model.params.items():
             model.get_layer(k).set_weights(v)
         _logger.info("Training model...")
-
         combined_mean_scores_global,_=evaluate(model,config,X_test,y_test)
 
-        model.fit(
+        history = model.fit(
             X_train,
             y_train_onehot,
             batch_size=cfg["batch_size"],
@@ -437,30 +482,21 @@ def main(
             validation_data=(X_test, y_test_onehot),
             callbacks=[CustomEpochLogger()],
         )
-        
 
         combined_mean_scores_global = {f"{key}_global": value for key, value in combined_mean_scores_global.items()}
-
+ 
         mlflow_writer.log_metrics(
-           metrics=combined_mean_scores_global , step=input_model.current_round
+            metrics=combined_mean_scores_global , step=input_model.current_round
         )
         duration = time.time() - start
         _logger.info(
             f"Elapsed time during model training:\t{round(duration / 60, 2)} min"
         )
 
-        # Save trained Model
-        model.save_weights(model_path)
-        #model.save(model_dir)
-        _logger.info(f"Model saved to '{model_path}'.")
-        save_model_info(model=model, model_dir=model_dir)
-
-        # save json config to model directory
-        # cp_conf(model_dir)
         _logger.info(
             f"Saved configuration of training run to {model_dir}"
         )
-        
+ 
         # (3) send back the model to nvflare server
         output_model = flare.FLModel(
             params={
@@ -469,7 +505,7 @@ def main(
             },
             metrics= combined_mean_scores_global,
         )
-        
+
         return output_model
 
     # (4) gets FLModel from NVFlare
@@ -484,17 +520,8 @@ def main(
         system_info = flare.system_info()
         print(f"NVFlare system info: {system_info}")
 
-        gpu_devices = tf.config.list_physical_devices('GPU')
-        if gpu_devices:
-            details = tf.config.experimental.get_device_details(gpu_devices[0])
-            print(details)
-            more_details = tf.sysconfig.get_build_info()
-            print(more_details)
-
-            message = subprocess.check_output('nvidia-smi')
-            print(message) 
-
         #Show which client uses which GPU
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
         gpus = tf.config.list_physical_devices('GPU')
         if gpus:
             print("GPUs are available:")
@@ -503,7 +530,6 @@ def main(
         else:
             print("No GPUs are available.")
     
-        
         train(input_model=input_model)
 
         
@@ -511,24 +537,29 @@ def main(
         # LOG SOME INFO ABOUT THE CLIENT IN THE MLFLOW AS TAGS 
         mlflow_writer.set_tags(sys_info)
 
-        
+
+
 def load_data(site):
     """
     Load and process data according to filters in utils.py
 
     :return: X_train, y_train, X_test, y_test
     """
+  
     if site=="site-1":
-        data_path = "/Users/leo/Desktop/MA/datasets/dataset_KA_test"
+        data_path = "/Users/leo/Desktop/MA/datasets/dataset_MU_test/"
     else:
-        data_path = "/Users/leo/Desktop/MA/datasets/dataset_MU_test"
-    
+        data_path = "/Users/leo/Desktop/MA/datasets/dataset_KA_test/"
+        
     start = time.time()
+
     #image_path =   'images'
     #masks_path =   'masks'
+
     config['data_root'] =  data_path 
+
     img_proc = ImageProcessor(config)
-   # print(config)
+
     X_train = img_proc.process_images(root="train")
     X_test = img_proc.process_images(root="test")
 
@@ -619,11 +650,10 @@ if __name__ == "__main__":
     main(
         data_root=args.data_root,
         split_root=args.split_root,
-        channels=4,
+        channels=args.channels,
         processing=args.processing,
         only_tir=args.only_tir,
         default_log=args.default_log,
         log_level=args.log_level,
     )
-    
 # nvflare simulator -n 2 -t 1 ./jobs/tensorflow_mlflow -w client_api_workspace

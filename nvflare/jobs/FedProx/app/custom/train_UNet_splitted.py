@@ -472,7 +472,7 @@ def main(
             y_train_onehot,
             batch_size=cfg["batch_size"],
             verbose=2,
-            epochs=cfg["epochs"],
+            epochs=2,#cfg["epochs"],
             validation_data=(X_test, y_test_onehot),
             callbacks=[CustomEpochLogger()],
         )
@@ -558,10 +558,10 @@ def load_data(site):
     :return: X_train, y_train, X_test, y_test
     """
     if site=="site-1":
-        data_path = "/hkfs/home/project/hk-project-test-p0023500/mp9809/datasets/dataset_MU/"
+        data_path = "/Users/leo/Desktop/MA/datasets/dataset_MU_test"
         #"/hkfs/home/project/hk-project-test-p0021801/uvecw/datasets/dataset_MU/"
     else:
-        data_path = "/hkfs/home/project/hk-project-test-p0023500/mp9809/datasets/dataset_KA/"
+        data_path = "/Users/leo/Desktop/MA/datasets/dataset_KA_test"
         #"/Users/leo/Desktop/dataset_KA/"
     
     start = time.time()
