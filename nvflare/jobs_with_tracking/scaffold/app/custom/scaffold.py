@@ -58,10 +58,6 @@ class Scaffold(BaseFedAvg):
         for k in self._global_ctrl_weights.keys():
             self._global_ctrl_weights[k] = np.zeros_like(self._global_ctrl_weights[k])
 
-        # Ensure logs directory exists
-        self.output_dir = "carbon_logs"
-        os.makedirs(self.output_dir, exist_ok=True)
-
     
     @perun.perun(data_out="perun_scaffold_results", app_name="scaffold",)
     def run(self) -> None:

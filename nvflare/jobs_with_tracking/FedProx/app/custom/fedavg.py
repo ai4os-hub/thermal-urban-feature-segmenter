@@ -33,12 +33,7 @@ class FedAvg(BaseFedAvg):
     """
 
     def __init__(self, *args, **kwargs):
-        """Initialize FedAvg and set up CodeCarbon tracking."""
         super().__init__(*args, **kwargs)
-
-        # Ensure logs directory exists
-        self.output_dir = "carbon_logs"
-        os.makedirs(self.output_dir, exist_ok=True)
         
     @perun.perun(data_out="perun_fedavg_results", app_name="fedavg",)
     def run(self) -> None:

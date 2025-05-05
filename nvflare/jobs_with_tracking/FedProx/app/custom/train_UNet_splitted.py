@@ -475,7 +475,7 @@ def main(
             y_train_onehot,
             batch_size=cfg["batch_size"],
             verbose=2,
-            epochs=2,#cfg["epochs"],
+            epochs=cfg["epochs"],
             validation_data=(X_test, y_test_onehot),
             callbacks=[CustomEpochLogger()],
         )
