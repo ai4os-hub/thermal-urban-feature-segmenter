@@ -502,15 +502,9 @@ def main(
             callbacks=[[CustomEpochLogger(), ScaffoldCallback(scaffold_helper)]],
         )
 
-
-
         curr_lr = get_lr_values(optimizer=optimizer)
 
         print("Finished Training")
-
-
-
-
 
         scaffold_helper.terms_update(
             model=model,
@@ -602,9 +596,9 @@ def load_data(site):
     :return: X_train, y_train, X_test, y_test
     """
     if site=="site-1":
-        data_path = "/hkfs/home/project/hk-project-test-p0023500/mp9809/datasets/dataset_MU/"
+        data_path = "/Users/leo/Desktop/MA/datasets/dataset_MU_test/"
     else:
-        data_path = "/hkfs/home/project/hk-project-test-p0023500/mp9809/datasets/dataset_KA/"
+        data_path = "/Users/leo/Desktop/MA/datasets/dataset_KA_test/"
     
     start = time.time()
     config['data_root'] =  data_path
