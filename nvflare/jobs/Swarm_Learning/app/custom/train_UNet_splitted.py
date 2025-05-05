@@ -25,9 +25,7 @@ from pathlib import Path, PosixPath
 import sys
 import time
 import warnings
-from tensorflow.keras.callbacks import EarlyStopping
 import subprocess
-
 
 # suppress messages from tf
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -46,9 +44,9 @@ import numpy as np
 import tensorflow as tf
 #tf.debugging.set_log_device_placement(True)
 import tensorflow_addons as tfa
-from keras.layers import Input, Conv2D
-from evaluate import evaluate
-
+from keras.layers import Input, Conv2D, Lambda
+import json
+from tensorflow.python.util.serialization import get_json_type
 
 #List the available GPUs and set XLA_FLAGS environment variable for TensorFlow
 gpus = tf.config.list_physical_devices('GPU')
@@ -62,11 +60,6 @@ else:
 # (1) import nvflare client API
 import nvflare.client as flare
 from nvflare.client.tracking import MLflowWriter
-from nvflare.app_opt.tf.scaffold import ScaffoldCallback, TFScaffoldHelper, get_lr_values
-
-from nvflare.app_common.app_constant import AlgorithmConstants
-from nvflare.client.tracking import SummaryWriter
-
 
 
 # import module dependencies
@@ -113,49 +106,6 @@ class GetKeyValuePairs(argparse.Action):
                     pass
             getattr(namespace, self.dest)[key] = value
 
-from tensorflow_addons.layers import GroupNormalization
-
-
-# Configure segmentation models to use GroupNormalization
-def get_unet_with_groupnorm(model):
-     
-    # Replace all BatchNormalization layers with GroupNormalization
-    input_tensor = model.input
-    x = input_tensor
-    
-    
-    def replace_layer(layer):
-        if isinstance(layer, tf.keras.layers.BatchNormalization):
-            channels = layer.input_shape[-1]
-            # Choose appropriate number of groups
-            num_groups = min(32, channels)
-            # Ensure number of channels is divisible by groups
-            while channels % num_groups != 0:
-                num_groups -= 1 
-            return GroupNormalization(
-                groups=num_groups,
-                axis=-1,
-                epsilon=0.001,
-                center=True,
-                scale=True
-            )
-        return layer
-    
-    # Create new model with replaced layers
-    new_model = tf.keras.models.clone_model(
-        model,
-        clone_function=replace_layer
-    )
-    
-    # Copy weights for non-BatchNorm layers
-    for layer, new_layer in zip(model.layers, new_model.layers):
-        if not isinstance(layer, tf.keras.layers.BatchNormalization):
-            new_layer.set_weights(layer.get_weights())
-    
-    return new_model
-
-
-
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Training model")
@@ -187,7 +137,7 @@ def parse_args():
         "--channels",
         dest="channels",
         type=int,
-        default=4,
+        default=3,
         choices=[4, 3],
         help="Whether to process the data as 3 channels "
         "(greyRGB+T+T) or keep the 4 channels (RGBT).",
@@ -255,6 +205,10 @@ def parse_args():
     log_levels_group.set_defaults(log_level=logging.WARNING)
     return parser.parse_args()
 
+
+
+
+
 def main(
     data_root: Path = None,
     split_root: Path = None,
@@ -266,7 +220,21 @@ def main(
     log_level=logging.WARNING,
 ):
     
-   
+    #Try getting the git info for tracking them within MLFlow
+    def get_git_info():
+        try:
+            # Initialize the Git repository object
+            repo = git.Repo(search_parent_directories=True)
+
+            # Get the remote URL of the repository
+            remote_url = repo.remotes.origin.url
+            remote_repo = git.cmd.Git().ls_remote(remote_url)
+            version = remote_repo.split()[0]
+            return remote_url, version
+        except git.InvalidGitRepositoryError:
+            print("Error: Not a valid Git repository.")
+            return None
+    
 
 
     """
@@ -395,35 +363,26 @@ def main(
             classes=NUM_CLASSES,
         )
 
-        base_model=get_unet_with_groupnorm(base_model)
-
         inp = Input(shape=(SIZE_H, SIZE_W, N))
         layer_1 = Conv2D(3, (1, 1))(
             inp
         )  # map N channels data to 3 channels
         out = base_model(layer_1)
 
+         
+
+        #out = Lambda(lambda x: base_model(x), name='base_model_output')(layer_1) 
+
+
         model = keras.models.Model(
             inputs=inp, outputs=out, name=base_model.name
         )
     metrics = [eval(v) for v in config["eval"]["SM_METRICS"].values()]
-    optimizer = optimizer(learning_rate=learning_rate)
     model.compile(
-        optimizer=optimizer,
+        optimizer=optimizer(learning_rate=learning_rate),
         loss=loss_function(alpha=alpha, gamma=gamma),
         metrics=metrics,
     )
-
-    early_stopping= EarlyStopping( monitor="val_precision", 
-    patience=3,
-    verbose=1,
-    restore_best_weights=True 
-    )
-
-    scaffold_helper = TFScaffoldHelper()
-    scaffold_helper.init(model=model)
-
-
     model_path = Path(model_dir, config["model"]["type"] + ".h5py")
 
     model_info = flare.receive()
@@ -440,7 +399,20 @@ def main(
         **model_config['train']
     }
     rounds = {"rounds": total_rounds}
- 
+
+    #check if the git info is available and add it to the other parameters for tracking
+    '''if get_git_info is not None:
+        git_repo, version = get_git_info()
+        git_info = {"git_repo": git_repo, "git_version": version}
+        print(git_info)
+
+        merged_params = {
+            **model_params,
+            **git_info,
+            **rounds
+            
+        }
+        model_params = merged_params'''
 
 
     mlflow_writer.log_params(model_params)
@@ -473,24 +445,6 @@ def main(
         # (5) loads model from NVFlare
         for k, v in input_model.params.items():
             model.get_layer(k).set_weights(v)
-
-
-
-        # (step 4) load regularization parameters from scaffold
-        global_ctrl_weights = input_model.meta.get(AlgorithmConstants.SCAFFOLD_CTRL_GLOBAL)
-
-        scaffold_helper.load_global_controls(weights=global_ctrl_weights)
-
-        c_global_para, c_local_para = scaffold_helper.get_params()
-
-        model_global = tf.keras.models.clone_model(model)
-        model_global.set_weights(model.get_weights())
-
-
-        combined_mean_scores_global,_=evaluate(model,config,X_test,y_test)
-
-
-
         _logger.info("Training model...")
         history = model.fit(
             X_train,
@@ -499,31 +453,16 @@ def main(
             verbose=2,
             epochs=cfg["epochs"],
             validation_data=(X_test, y_test_onehot),
-            callbacks=[[CustomEpochLogger(), ScaffoldCallback(scaffold_helper)]],
+            
+            callbacks=[CustomEpochLogger()],
         )
-
-
-
-        curr_lr = get_lr_values(optimizer=optimizer)
-
-        print("Finished Training")
-
-
-
-
-
-        scaffold_helper.terms_update(
-            model=model,
-            curr_lr=curr_lr,
-            c_global_para=c_global_para,
-            c_local_para=c_local_para,
-            model_global=model_global,
-        )
-
-        combined_mean_scores_global = {f"{key}_global": value for key, value in combined_mean_scores_global.items()}
+        metrics = {
+            metric: round(values[-1],4)
+            for metric, values in history.history.items()
+        }
 
         mlflow_writer.log_metrics(
-            metrics=combined_mean_scores_global, step=input_model.current_round
+           metrics=metrics, step=input_model.current_round
         )
         duration = time.time() - start
         _logger.info(
@@ -541,18 +480,16 @@ def main(
         _logger.info(
             f"Saved configuration of training run to {model_dir}"
         )
-
+ 
         # (3) send back the model to nvflare server
         output_model = flare.FLModel(
             params={
                 layer.name: layer.get_weights()
                 for layer in model.layers
             },
-            metrics=combined_mean_scores_global,
-            meta={
-                AlgorithmConstants.SCAFFOLD_CTRL_DIFF: scaffold_helper.get_delta_controls(),
-            },
+            metrics=history.history,
         )
+
         return output_model
 
     # (4) gets FLModel from NVFlare
@@ -602,18 +539,20 @@ def load_data(site):
     :return: X_train, y_train, X_test, y_test
     """
     if site=="site-1":
-        data_path = "/hkfs/home/project/hk-project-test-p0023500/mp9809/datasets/dataset_MU/"
+        data_path =  "/Users/leo/Desktop/MA/datasets/dataset_MU_test/"
     else:
-        data_path = "/hkfs/home/project/hk-project-test-p0023500/mp9809/datasets/dataset_KA/"
+        data_path =  "/Users/leo/Desktop/MA/datasets/dataset_KA_test/"
+        #"/Users/leo/Desktop/dataset_KA/"
     
     start = time.time()
     config['data_root'] =  data_path
+
     img_proc = ImageProcessor(config )
-    print(config)
+
     X_train = img_proc.process_images(root="train")
     X_test = img_proc.process_images(root="test")
 
-    mask_proc = MaskProcessor(config )
+    mask_proc = MaskProcessor(config)
     y_train = mask_proc.load_masks(root="train")
     y_test = mask_proc.load_masks(root="test")
 
@@ -689,7 +628,8 @@ def save_model_info(model, model_dir: Path):
 
     with open(config_path, "w") as json_file:
         json.dump(
-            model.get_config(), json_file, indent=4
+            model.get_config(), json_file, indent=4,
+            default=get_json_type
         )  # Indent for better readability
 
     _logger.info(f"Model configuration saved to '{config_path}'")
