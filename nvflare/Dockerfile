@@ -68,7 +68,7 @@ ENV CUDA_HOME=/usr/local/cuda/
 
 # Install user app
 # make sure to update pip so that installations in editable mode (-e) work!
-RUN git clone --depth 1 -b $branch https://github.com/ai4os-hub/thermal-urban-feature-segmenter.git && \
+RUN git clone --depth 1 -b $branch --recurse-submodules https://github.com/ai4os-hub/thermal-urban-feature-segmenter.git && \
     cd thermal-urban-feature-segmenter && \
     git pull --recurse-submodules && \
     git submodule update --remote --recursive && \
@@ -76,5 +76,5 @@ RUN git clone --depth 1 -b $branch https://github.com/ai4os-hub/thermal-urban-fe
     pip3 install packaging==22.0 && \
     pip3 install --no-cache-dir -e ./TUFSeg && \
     pip3 install --no-cache-dir -e . && \
-    pip3 install -r nvflare/requirements_nvflare.txt
+    pip3 install --no-deps  -r nvflare/requirements_nvflare.txt && \
     cd ..
