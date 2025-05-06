@@ -82,3 +82,6 @@ libraries:
   - Keras
 data-type:
   - Image
+resources:
+  inference:
+    memory_MB: 10000
