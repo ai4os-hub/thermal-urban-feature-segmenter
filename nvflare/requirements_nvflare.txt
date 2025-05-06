@@ -1,4 +1,4 @@
 nvflare~=2.5.0
 mlflow
-protobuf~=3.20
-perun~=0.8.9
+protobuf==3.20
+perun==0.8.9
