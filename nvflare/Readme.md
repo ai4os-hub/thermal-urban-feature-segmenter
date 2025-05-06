@@ -15,10 +15,10 @@ How to change an existing machine learning workflow into a federated learning wo
 ### 1. Clone the Repository and Install Dependencies
 
 ```bash
-git clone -b nvflare https://github.com/ai4os-hub/thermal-urban-feature-segmenter.git # Clone the 'nvflare' branch of the repository 
+git clone -b nvflare https://github.com/ai4os-hub/thermal-urban-feature-segmenter.git # Clone the 'nvflare' branch of the repository
+cd thermal-urban-feature-segmenter/TUFSeg   
 git init submodule # Initialize submodules in the cloned repo
-git submodule update --remote --merge # Update submodules to the latest commit from their remote and merge changes
-cd TUFSeg      
+git submodule update --remote --merge # Update submodules to the latest commit from their remote and merge changes   
 pip install -e . # Install TUFSeg package
 cd ..
 pip install -e . # Install the deepaas api requirements
