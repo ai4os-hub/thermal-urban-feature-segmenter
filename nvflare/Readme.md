@@ -66,7 +66,7 @@ source /path/to/venv/bin/activate
 ```
 
 ###  Step 2: Run the NVFLARE Simulator
-First, update the data path for the clients in the `train_UNet_splitted.py` script within the job folder you plan to execute.  
+First, update the `data_path` for the clients in the `train_UNet_splitted.py` script within the job folder you plan to execute.  
 For example, in the FedAvg job, you can find the relevant line [here](https://github.com/ai4os-hub/thermal-urban-feature-segmenter/blob/01c8da99fb8998342da8b6b1a79a05aaea65551f/nvflare/jobs/FedAvg/app/custom/train_UNet_splitted.py#L522).
 
 Execute the following commnad in the terminal:
