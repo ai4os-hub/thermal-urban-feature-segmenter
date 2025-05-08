@@ -27,8 +27,7 @@ pip install -r requirements_nvflare # Install the NVFlare requirements
 ```
 
 ## ⚠️ Virtual Environment Recommendation
-
-It is **strongly recommended** to use a virtual environment (e.g., `venv`) when setting up and running this project to avoid dependency conflicts.
+> **Note:** It is **strongly recommended** to either use a virtual environment (e.g., `venv`) or the [Dockerfile](/dockerfile) provided to build the Docker image when setting up and running this project, in order to avoid dependency issues.
 
 ---
 
