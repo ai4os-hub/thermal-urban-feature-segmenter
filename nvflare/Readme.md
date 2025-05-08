@@ -71,7 +71,7 @@ For example, in the FedAvg job, you can find the relevant line [here](https://gi
 
 Execute the following commnad in the terminal:
 ```bash
-nvflare simulator -n 2 -t 2 ./jobs/$[Job_name] -w path/to/workspace
+nvflare simulator -n 2 -t 2 ./jobs/${Job_name} -w path/to/workspace
 
 ```
 
