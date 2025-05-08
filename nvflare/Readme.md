@@ -58,7 +58,7 @@ export MLFLOW_TRACKING_PASSWORD='your_password'
 
  
 
-## 3. Running the Federated Training
+## 3. Running the Federated Training in simulation mode
 
 ###  Step 1: Activate the Virtual Environment
 ```bash
@@ -79,6 +79,8 @@ nvflare simulator -n 2 -t 2 ./jobs/$[Job_name] -w path/to/workspace
 - `-n`: indicates the amount of sites within the project. This number should align with the number of sites within the config files and within the main code
 - `-t`: indicates the amount of threads
 - `-w`: indicates the path where the workspace should be created
+## 4. Running the Federated Training in real world
+Please refer to [Federated Learning with NVFLARE](https://docs.ai4os.eu/en/latest/howtos/train/federated-nvflare.html) for instructions on how to start the NVFLARE server on the AI4EOSC dashboard and run clients from anywhere in the world to begin training the model.
 
 # Structure of this project
 ```bash
