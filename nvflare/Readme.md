@@ -6,7 +6,9 @@ Due to multiple cities involved and the growing attention in regard of privacy, 
 In particular, [NVFlare](https://github.com/NVIDIA/NVFlare) and its variaty of workflows and features was used.
 
 **NOTE:**
-How to change an existing machine learning workflow into a federated learning workflow is shown [here](https://github.com/NVIDIA/NVFlare/tree/main/examples/hello-world/ml-to-fl/tf#transform-cifar10-tensorflow-training-code-to-fl-with-nvflare-client-api).
+First, update the `data_path` for the clients in the `train_UNet_splitted.py` script within the job folder you plan to execute.  
+For example, in the FedAvg job, you can find the relevant line [here](https://github.com/ai4os-hub/thermal-urban-feature-segmenter/blob/01c8da99fb8998342da8b6b1a79a05aaea65551f/nvflare/jobs)
+
 
 ---
 
