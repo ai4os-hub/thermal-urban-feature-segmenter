@@ -1,0 +1,4 @@
+perun==0.8.9
+nvflare~=2.5.0
+protobuf==3.20
+
