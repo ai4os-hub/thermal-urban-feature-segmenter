@@ -558,11 +558,9 @@ def load_data(site):
     :return: X_train, y_train, X_test, y_test
     """
     if site=="site-1":
-        data_path = "/Users/leo/Desktop/MA/datasets/dataset_MU_test"
-        #"/hkfs/home/project/hk-project-test-p0021801/uvecw/datasets/dataset_MU/"
+        data_path = "/srv/thermal-urban-feature-segmenter/data/datasets/dataset_MU_test/"
     else:
-        data_path = "/Users/leo/Desktop/MA/datasets/dataset_KA_test"
-        #"/Users/leo/Desktop/dataset_KA/"
+        data_path = "/srv/thermal-urban-feature-segmenter/data/datasets/dataset_KA_test/"
     
     start = time.time()
     config['data_root'] =  data_path
